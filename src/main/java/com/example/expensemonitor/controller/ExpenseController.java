@@ -1,5 +1,6 @@
 package com.example.expensemonitor.controller;
 
+import com.example.expensemonitor.dao.ExpenseRepository;
 import com.example.expensemonitor.dao.ExpenseTypeRepository;
 import com.example.expensemonitor.dao.UserRepository;
 import com.example.expensemonitor.model.Expense;
@@ -44,12 +45,16 @@ public class ExpenseController {
     @Autowired
     private final ExpenseTypeRepository expenseTypeRepository;
 
+    @Autowired
+    private final ExpenseRepository expenseRepository;
+
     private static final int PAGE_SIZE = 8;
 
-    public ExpenseController(ExpenseService expenseService, ExpenseTypeService expenseTypeService, ExpenseTypeRepository expenseTypeRepository) {
+    public ExpenseController(ExpenseService expenseService, ExpenseTypeService expenseTypeService, ExpenseTypeRepository expenseTypeRepository, ExpenseRepository expenseRepository) {
         this.expenseService = expenseService;
         this.expenseTypeService = expenseTypeService;
         this.expenseTypeRepository = expenseTypeRepository;
+        this.expenseRepository = expenseRepository;
     }
 
     @ModelAttribute("totalAmount")
@@ -112,6 +117,9 @@ public class ExpenseController {
         model.addAttribute("monthlyTotal", monthlyTotal);
         model.addAttribute("yearlyTotal", yearlyTotal);
 
+        List<ExpenseType> userExpenseTypes = expenseTypeRepository.findByUserId(user.getId());
+        model.addAttribute("expenseTypes", userExpenseTypes);
+
         return "user/dashboard";
     }
 
@@ -163,4 +171,33 @@ public class ExpenseController {
         }
         return "redirect:/newExpenseType";
     }
+
+    @PostMapping("/addExpense")
+    public String addExpense(@ModelAttribute @Valid Expense expense,
+                             BindingResult bindingResult,
+                             Principal principal,
+                             Model model){
+        System.out.println(expense);
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("expense", expense);
+            System.out.println("BINDING HAS ERRORS ____________________________________>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+            return "redirect:/dashboard";
+        }
+        String username = principal.getName();
+        User user = userRepository.getUserByUserName(username);
+        System.out.println("********************************&&&&&&&&&&&&&&&&&&&&&&&&&&&&&*******************************");
+
+        System.out.println(expense);
+
+        expense.setUser(user);
+        ExpenseType expenseType = expenseTypeRepository.findByExpenseCategoryAndUser(expense.getExpenseType().getExpenseCategory(), user)
+                .orElseThrow(() -> new RuntimeException("Invalid Expense Type"));
+
+        expense.setExpenseType(expenseType);
+        expenseRepository.save(expense);
+
+        return "redirect:/dashboard";
+    }
+
+
 }

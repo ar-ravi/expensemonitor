@@ -19,7 +19,7 @@
 						<input class="form-control form-control-sm form-rounded" type="number" min="1900" max="2099" step="1" id="year" name="year" value="2023">
 						<div><p></p></div>
 						<label class="form-label" for="month">Select Month:</label>
-						<select class="form-select form-select-sm form-rounded" id="month" name="month">
+						<select class="form-select form-select-sm form-rounded mb-3" id="month" name="month">
 							<option selected value="">Select the month</option>
 							<option th:each="month : ${T(java.time.Month).values()}"
 							        th:value="${month}"
@@ -28,7 +28,7 @@
 						<br>
 
 						<label class="form-label" for="expenseTypeFilter">Type of expense:</label>
-						<select class="form-select form-select-sm form-rounded" id="expenseTypeFilter" name="expenseTypeFilter">
+						<select class="form-select form-select-sm form-rounded mb-3" id="expenseTypeFilter" name="expenseTypeFilter">
 							<option selected value="">Choose the type of expense </option>
 							<option th:each="expenseType : ${expenseTypes}" th:value="${expenseType.expenseCategory}" th:text="${expenseType.expenseCategory}">
 						</select>
@@ -73,7 +73,7 @@
 						<tbody>
 						<tr th:each="expense : ${expenses}">
 							<td th:text="${expense.name}"></td>
-							<td th:text="${expense.expenseType}"></td>
+							<td th:text="${expense.expenseType.expenseCategory}"></td>
 							<td th:text="${{expense.amount}}"></td>
 							<td th:text="${expense.date}"></td>
 							<td>
@@ -147,7 +147,7 @@
 			<div class="container-sm">
 				<h3 class="tableHead">Add expense below:</h3>
 
-				<form  th:action="@{/AddExpense}" th:method="post" th:object="${expense}" novalidate >
+				<form  th:action="@{/addExpense}" th:method="post" th:object="${expense}" novalidate >
 
 					<div class="mb-3"> <!--name of expense-->
 						<label for="name"  class="form-label">Name of expense</label>
@@ -161,7 +161,7 @@
 						<label class="form-label" for="expenseType">Type of expense</label>
 						<select class="form-select form-rounded" id="expenseType" th:field="*{expenseType}" th:errorclass="is-invalid" >
 							<option selected value="">Choose the type of expense </option>
-							<option th:each="expenseType : ${expenseTypes}" th:value="${expenseType.expenseCategory}" th:text="${expenseType.expenseCategory}">
+							<option th:each="expenseType : ${expenseTypes}" th:value="${expenseType.id}" th:text="${expenseType.expenseCategory}">
 						</select>
 						<div id="validationExpenseType" class="invalid-feedback" th:errors="*{expenseType}">
 							Please select the expense types.
