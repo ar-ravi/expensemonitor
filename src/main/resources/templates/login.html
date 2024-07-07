@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="base::layout(~{::section})">
+<head>
+	<meta charset="UTF-8">
+	<title>Login</title>
+	<style>
+		body {
+			background-color: #2d2d2d;
+		}
+		.card {
+			background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+			border: none;
+			border-radius: 20px; /* Increased border radius for more rounded corners */
+			box-shadow: 0 3px 15px rgba(0, 0, 0, 0.4);
+		}
+		.form-control, .btn {
+			border-radius: 10px;
+		}
+		.btn-primary {
+			background-color: #9CDBA6;
+			border: none;
+			color: #000;
+			box-shadow: 0 3px 15px rgba(0, 0, 0, 0.4);
+		}
+		.btn-primary:hover {
+			background-color: #50B498;
+		}
+		.link-primary {
+			color: #50B498;
+		}
+	</style>
+</head>
+<body>
+<section class="py-5">
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+				<div class="card" style="background: -webkit-linear-gradient(135deg, #f6d365 0%, #fda085 100%);">
+					<div class="card-body p-4 p-md-5">
+						<div class="text-center mb-4">
+							<a href="#!">
+								<img th:src="@{'/img/logo2.jpg'}" alt="Logo" width="80" height="80" class="rounded-circle">
+							</a>
+						</div>
+						<h2 class="card-title text-center mb-4 fs-4">Log in to your account</h2>
+						<form th:action="@{/login}" method="post" th:object="${user}">
+							<div class="mb-3">
+								<label for="username" class="form-label">Username</label>
+								<input type="text" class="form-control" name="username" id="username" placeholder="Enter your username" th:field="*{username}" required>
+							</div>
+							<div class="mb-3">
+								<label for="password" class="form-label">Password</label>
+								<input type="password" class="form-control" name="password" id="password" placeholder="Enter your password" th:field="*{password}" required>
+							</div>
+							<div class="d-grid mt-4">
+								<button class="btn btn-primary btn-lg" type="submit">Log in</button>
+							</div>
+						</form>
+						<p class="text-center mt-4 mb-0">Don't have an account? <a th:href="@{/signup}" class="link-primary text-decoration-none">Sign up</a></p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+</body>
+</html>
