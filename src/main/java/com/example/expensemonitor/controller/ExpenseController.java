@@ -24,7 +24,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -114,17 +116,25 @@ public class ExpenseController {
     }
 
     @GetMapping("/newExpenseType")
-    public String showExpenseTypes(){
+    public String showExpenseTypes(Model model, Principal principal){
+        String username = principal.getName();
+        User user = userRepository.getUserByUserName(username);
+        model.addAttribute("userId", user.getId());
+        model.addAttribute("expenseType", new ExpenseType());
+
+        List<ExpenseType> userExpenseTypes = expenseTypeRepository.findByUserId(user.getId());
+        model.addAttribute("expenseTypes", userExpenseTypes);
+
         return "user/newExpenseType";
     }
 
-    @PostMapping("/newExpenseType/{id}")
-    public String addExpenseTypes(@PathVariable("id") Integer id, @Valid ExpenseType expenseType, BindingResult bindingResult, Model model){
+    @PostMapping("/newExpenseType")
+    public String addExpenseTypes(@ModelAttribute @Valid ExpenseType expenseType, BindingResult bindingResult, @RequestParam("userId") Integer userId, Model model){
         if(bindingResult.hasErrors()){
             model.addAttribute("expenseType", expenseType);
-            return "user/newExpenseType";
+            return "/newExpenseType";
         }
-        Optional<User> optionalUser = userRepository.findById(id);
+        Optional<User> optionalUser = userRepository.findById(userId);
         if(!optionalUser.isPresent()){
             return "redirect:/error";
         }
@@ -132,6 +142,25 @@ public class ExpenseController {
         expenseType.setUser(user);
         expenseTypeRepository.save(expenseType);
 
-        return "redirect:/expenseTypes/" + id;
+        return "redirect:/dashboard";
+    }
+
+    @PostMapping("/newExpenseType/delete/{id}")
+    public String deleteById(@PathVariable("id") Long id, Principal principal){
+        String username = principal.getName();
+        User user = userRepository.getUserByUserName(username);
+        Optional<ExpenseType>optionalExpenseType = expenseTypeRepository.findById(id);
+
+        if(optionalExpenseType.isPresent()){
+            ExpenseType expenseType = optionalExpenseType.get();
+            if(expenseType.getUser().getId().equals(user.getId())){
+                expenseTypeRepository.delete(expenseType);
+            } else{
+
+            }
+        } else{
+
+        }
+        return "redirect:/newExpenseType";
     }
 }

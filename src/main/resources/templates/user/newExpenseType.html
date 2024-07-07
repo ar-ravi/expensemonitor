@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="user/base::layout(~{::section})">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+</head>
+<body>
+<section>
+	<div class="container-fluid" id="container" >
+		<div class="center-column">
+			<div><br></div>
+
+			<div class="container-sm">
+				<h3 class="tableHead">Types of expense</h3>
+				<table class="table table-hover" id="data-table">
+					<thead>
+					<tr>
+						<th scope="col">Type of expense</th>
+						<th scope="col">Delete</th>
+					</tr>
+					</thead>
+					<tbody>
+					<tr th:each="expenseType : ${expenseTypes}">
+						<td th:text="${expenseType.expenseCategory}"></td>
+						<td>
+							<form th:action="@{/newExpenseType/delete/{id}(id=${expenseType.id})}" th:method="post">
+								<input width="25" height="25" type="image" src="https://img.icons8.com/ios-glyphs/30/filled-trash.png" alt="filled-trash" />
+							</form>
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<div class="add-category-column">
+			<div><br></div>
+			<div><br></div>
+			<div class="newExpenseContent">
+				<h3 class="tableHead">Add new expense type</h3>
+				<br>
+				<form  th:action="@{/newExpenseType}" th:object="${expenseType}" method="post">
+					<input type="hidden" name="userId" th:value="${userId}">
+					<div class="mb-3"> <!--name of expense-->
+						<label for="name"  class="form-label">New expense type</label>
+						<input type="text" id="name" class="form-control form-rounded" th:field="*{expenseCategory}"  th:errorclass="is-invalid" aria-describedby="nameHelp">
+						<div id="validationName" class="invalid-feedback" th:errors="*{expenseCategory}">
+						</div>
+					</div>
+					<div th:if="${errorMessage}" class="alert alert-danger">
+						<p th:text="${errorMessage}"></p>
+					</div>
+
+					<br>
+					<button type="submit" class="btn btn-outline-dark btn-sm btn-shadow">Add</button>
+
+					<a th:href="@{/dashboard}" class="btn btn-dark btn-sm btn-shadow cancel-btn">Go back</a>
+				</form>
+
+			</div>
+			<!--   ---------------------------------------------------------------->
+		</div>
+	</div>
+</section>
+
+
+</body>
+</html>

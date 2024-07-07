@@ -17,5 +17,5 @@ public interface ExpenseTypeRepository extends JpaRepository<ExpenseType, Long> 
             @Param("userId") int userId,
             @Param("expenseCategory") String expenseCategory);
 
-    List<ExpenseType> findByUserId(int userId);
+    List<ExpenseType> findByUserId(Long userId);
 }
