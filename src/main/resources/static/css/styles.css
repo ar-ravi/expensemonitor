@@ -1,5 +1,5 @@
 .navbar-custom {
-    background-color: #9CDBA6;
+    background-color: #A87676;
     border-radius: 6px;
     padding-top: 2px;
     padding-bottom: 2px;
@@ -11,13 +11,13 @@
     margin-left: 12px;
     border: 0;
     border-radius: 10px;
-    background-image: linear-gradient( 174.2deg,  rgba(255,244,228,1) 7.1%, rgba(240,246,238,1) 67.4% );
+    background-image: linear-gradient(174.2deg, #FFB1B1 7.1%, #FFCBCB 67.4%);
     padding: 10px
 
 }
 
 body {
-    background-color: #2d2d2d
+    background-color: #A87676
 }
 
 #container {
@@ -32,7 +32,7 @@ body {
     flex: 0.8;
     border: 0; /* Set a border for the container */
     border-radius: 10px;
-    background-image: linear-gradient( 174.2deg,  rgba(255,244,228,1) 7.1%, rgba(240,246,238,1) 67.4% );
+    background-image: linear-gradient(174.2deg, #FFB1B1 7.1%, #FFCBCB 67.4%);
 
     padding: 10px;
     margin-top: 5px
@@ -42,7 +42,7 @@ body {
                 flex: 1.5;
                 border: 0; /* Set a border for the container */
                 border-radius: 10px;
-                background-image: linear-gradient( 174.2deg,  rgba(255,244,228,1) 7.1%, rgba(240,246,238,1) 67.4% );
+                background-image: linear-gradient(174.2deg, #FFB1B1 7.1%, #FFCBCB 67.4%);
                 padding: 10px;
                 margin-top: 5px
         }
@@ -55,7 +55,7 @@ body {
     overflow-y: auto;
     border: 0;
     border-radius: 10px;
-    background-image: linear-gradient( 174.2deg,  rgba(255,244,228,1) 7.1%, rgba(240,246,238,1) 67.4% );
+    background-image: linear-gradient(174.2deg, #FFB1B1 7.1%, #FFCBCB 67.4%);
     margin-top: 5px
 }
 
@@ -120,7 +120,7 @@ table {
 .newExpenseContent {
     height: 350px;
     width: 400px;
-    background-image: linear-gradient( 174.2deg,  rgba(255,244,228,1) 7.1%, rgba(240,246,238,1) 67.4% );
+    background-image: linear-gradient(174.2deg, #FFB1B1 7.1%, #FFCBCB 67.4%);
     border: 0;
     border-radius: 20px;
     padding: 20px;
@@ -132,7 +132,7 @@ table {
     flex: 1.5;
     border: 0; /* Set a border for the container */
     border-radius: 10px;
-    background-image: linear-gradient( 174.2deg,  rgba(255,244,228,1) 7.1%, rgba(240,246,238,1) 67.4% );
+    background-image: linear-gradient(174.2deg, #FFB1B1 7.1%, #FFCBCB 67.4%);
     padding: 10px;
     margin-top: 5px
 }
@@ -160,4 +160,9 @@ table {
 
 .btn-download {
     font-size: 14px;
+}
+
+.updateCont{
+    max-width: 500px;
+    margin: 0 auto;
 }

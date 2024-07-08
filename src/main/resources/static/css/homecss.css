@@ -1,0 +1,43 @@
+body {
+    background-color: #2d2d2d;
+}
+.card {
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    border: none;
+    border-radius: 20px; /* Increased border radius for more rounded corners */
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.4);
+}
+.form-control, .btn {
+    border-radius: 10px;
+}
+.btn-primary {
+    background-color: #9CDBA6;
+    border: none;
+    color: #000;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.4);
+}
+.btn-primary:hover {
+    background-color: #50B498;
+}
+.link-primary {
+    color: #50B498;
+}
+
+
+.navbar-custom {
+    background-color: black;
+    border-radius: 6px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.navbar {
+    margin-right: 12px;
+    margin-top: 10px;
+    margin-left: 12px;
+    border: 0;
+    border-radius: 10px;
+    background-image: linear-gradient(174.2deg, #FFB1B1 7.1%, #FFCBCB 67.4%);
+    padding: 10px
+
+}

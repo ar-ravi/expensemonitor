@@ -19,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -50,7 +51,7 @@ public class ExpenseController {
     @Autowired
     private final ExpenseRepository expenseRepository;
 
-    private static final int PAGE_SIZE = 8;
+    private static final int PAGE_SIZE = 7;
 
     public ExpenseController(ExpenseService expenseService, ExpenseTypeService expenseTypeService, ExpenseTypeRepository expenseTypeRepository, ExpenseRepository expenseRepository) {
         this.expenseService = expenseService;
@@ -60,20 +61,37 @@ public class ExpenseController {
     }
 
     @ModelAttribute("totalAmount")
-    public BigDecimal getTotalAmount(@RequestParam(required = false) Long userId) {
-        Iterable<Expense> expenses = userId != null ?
-                expenseService.findAllByUserId(userId) :
-                expenseService.findAll();
-        return expenseService.getTotalAmount(expenses);
+    public BigDecimal getTotalAmount() {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = userDetails.getUsername();
+
+        // Assuming you have a method to get user by username
+        User currentUser = userRepository.getUserByUserName(username);
+
+        if (currentUser != null) {
+            Iterable<Expense> expenses = expenseService.findAllByUserId(currentUser.getId());
+            return expenseService.getTotalAmount(expenses);
+        } else {
+            // Handle the case where the user is not found
+            return BigDecimal.ZERO;
+        }
     }
 
 
     @ModelAttribute("expenses")
-    public Page<Expense> getExpenses(@PageableDefault(size = PAGE_SIZE) Pageable page,
-                                     @RequestParam(required = false) Long userId) {
-        return userId != null ?
-                expenseService.findAllByUserId(userId, page) :
-                expenseService.findAll(page);
+    public Page<Expense> getExpenses(@PageableDefault(size = PAGE_SIZE) Pageable page) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = userDetails.getUsername();
+
+        // Assuming you have a method to get user by username
+        User currentUser = userRepository.getUserByUserName(username);
+
+        if (currentUser != null) {
+            return expenseService.findAllByUserId(currentUser.getId(), page);
+        } else {
+            // Handle the case where the user is not found
+            return Page.empty();
+        }
     }
 
     @GetMapping("/expenses")
@@ -92,28 +110,30 @@ public class ExpenseController {
         return new ExpenseType();
     }
 
+
+//    ------------------------------------------------------------------------SHOW USER DASHBOARD ------------------------------------------------------------------------
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         // Get the authenticated user
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
 
-        // Fetch user data
         User user = userRepository.getUserByUserName(username);
 
+        System.out.println("____________________________________________________________________________________________");
         System.out.println(user);
 
-        // Fetch recent expenses (e.g., last 5)
+
         Page<Expense> recentExpenses = expenseService.findAllByUserId(user.getId(), PageRequest.of(0, 5, Sort.by("date").descending()));
 
-        // Calculate total expenses for the current month
+
         LocalDate now = LocalDate.now();
         BigDecimal monthlyTotal = expenseService.getTotalAmountForMonthAndYear(user.getId(), now.getMonthValue(), now.getYear());
 
-        // Calculate total expenses for the current year
+
         BigDecimal yearlyTotal = expenseService.getTotalAmountForYear(user.getId(), now.getYear());
 
-        // Add data to the model
+
         model.addAttribute("user", user);
         model.addAttribute("recentExpenses", recentExpenses.getContent());
         model.addAttribute("monthlyTotal", monthlyTotal);
@@ -125,6 +145,7 @@ public class ExpenseController {
         return "user/dashboard";
     }
 
+//    ----------------------------------------------------------------------------SHOW EXPENSE TYPE FORM---------------------------------------------------------------------------
     @GetMapping("/newExpenseType")
     public String showExpenseTypes(Model model, Principal principal){
         String username = principal.getName();
@@ -135,9 +156,12 @@ public class ExpenseController {
         List<ExpenseType> userExpenseTypes = expenseTypeRepository.findByUserId(user.getId());
         model.addAttribute("expenseTypes", userExpenseTypes);
 
+        model.addAttribute("page", "updatePage");
+
         return "user/newExpenseType";
     }
 
+//    ----------------------------------------------------------------------------ADD NEW EXPENSE TYPE----------------------------------------------------------------------------------
     @PostMapping("/newExpenseType")
     public String addExpenseTypes(@ModelAttribute @Valid ExpenseType expenseType, BindingResult bindingResult, @RequestParam("userId") Integer userId, Model model){
         if(bindingResult.hasErrors()){
@@ -155,6 +179,7 @@ public class ExpenseController {
         return "redirect:/dashboard";
     }
 
+//    ----------------------------------------------------------------------------DELETE EXPENSE TYPE-----------------------------------------------------------------------
     @PostMapping("/newExpenseType/delete/{id}")
     public String deleteById(@PathVariable("id") Long id, Principal principal, RedirectAttributes redirectAttributes){
         String username = principal.getName();
@@ -180,6 +205,8 @@ public class ExpenseController {
         return "redirect:/newExpenseType";
     }
 
+
+//    -------------------------------------------------------ADD NEW EXPENSE-----------------------------------------------------------------------------
     @PostMapping("/addExpense")
     public String addExpense(@ModelAttribute @Valid Expense expense,
                              BindingResult bindingResult,
@@ -204,6 +231,7 @@ public class ExpenseController {
         return "redirect:/dashboard";
     }
 
+//    --------------------------------------------------------------------------DELETE AN EXPENSE------------------------------------------------------------
     @PostMapping("/delete/{id}")
     public String deleteExpenseById(@PathVariable("id") Long id, Principal principal){
 
@@ -218,6 +246,7 @@ public class ExpenseController {
         return "redirect:/dashboard";
     }
 
+//    ------------------------------------------------------------------------UPDATE AN EXPENSE-------------------------------------------------------------
     @GetMapping("/update/{id}")
     public String showUpdateExpenseForm(@PathVariable("id") Long expenseId, Model model, Principal principal){
         String username = principal.getName();
@@ -252,12 +281,15 @@ public class ExpenseController {
         }
         return "redirect:/dashboard";
     }
+
+
+//    -------------------------------------------------------------FILTERING EXPENSE-------------------------------------------------------------------------------------
     @GetMapping("/expenses/filter")
     public String filterExpenses(@RequestParam(required = false) Integer year,
                                  @RequestParam(required = false) String month,
                                  @RequestParam(required = false) String expenseTypeFilter,
                                  @RequestParam(defaultValue = "0") int page,
-                                 @RequestParam(defaultValue = "8") int size,
+                                 @RequestParam(defaultValue = "7") int size,
                                  Model model,
                                  Principal principal) {
         String username = principal.getName();

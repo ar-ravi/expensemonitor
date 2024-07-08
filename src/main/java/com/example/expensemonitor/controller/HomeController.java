@@ -33,7 +33,7 @@ public class HomeController {
 
     @GetMapping("/signup")
     public String signup(Model model, HttpSession session){
-        model.addAttribute("title", "Register - Expense Monitor");
+        model.addAttribute("title", "Register");
         model.addAttribute("user", new User());
         return "signup" ;
     }
@@ -47,6 +47,8 @@ public class HomeController {
 
     @PostMapping("/do-register")
     public String registerUser(@ModelAttribute User user){
+        System.out.println("****************************************************************************************");
+        System.out.println(user);
         user.setRole("ROLE_USER");
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         System.out.println(user);
