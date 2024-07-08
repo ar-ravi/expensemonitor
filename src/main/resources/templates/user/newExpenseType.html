@@ -11,6 +11,19 @@
 			<div><br></div>
 
 			<div class="container-sm">
+				<div th:if="${error}" class="alert alert-danger alert-dismissible fade show alert-auto-dismiss" style="border-radius:15px;" role="alert">
+					<span th:text="${error}"></span>
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+
+				<div th:if="${success}" class="alert alert-success alert-dismissible fade show alert-auto-dismiss" style="border-radius:15px;" role="alert">
+					<span th:text="${success}"></span>
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
 				<h3 class="tableHead">Types of expense</h3>
 				<table class="table table-hover" id="data-table">
 					<thead>

@@ -7,8 +7,6 @@
 <body>
 <section>
 	<div class="container-fluid" id="container">
-
-
 		<div class="left-column">
 			<div class="container-sm">
 				<div><br></div>
@@ -53,6 +51,20 @@
 				<h5 style="font-weight: bold">Total Expenses: [[${{totalAmount}}]]</h5>
 			</div>
 			<div><br></div>
+			<div th:if="${error}" class="alert alert-danger alert-dismissible fade show alert-auto-dismiss" style="border-radius:15px;" role="alert">
+				<span th:text="${error}"></span>
+				<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+
+			<div th:if="${success}" class="alert alert-success alert-dismissible fade show alert-auto-dismiss" style="border-radius:15px;" role="alert">
+				<span th:text="${success}"></span>
+				<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+
 			<div class="container-sm" th:if="${expenses.isEmpty()}">
 				<h4>No expenses found</h4>
 			</div>
@@ -83,7 +95,7 @@
 								</a>
 							</td>
 							<td>
-								<form th:action="@{/expenses/delete/individual/{id}(id=${expense.id})}" th:method="post">
+								<form th:action="@{/delete/{id}(id=${expense.id})}" th:method="post">
 									<input width="25" height="25" type="image" src="https://img.icons8.com/ios-glyphs/30/filled-trash.png" alt="filled-trash" />
 								</form>
 							</td>
@@ -94,10 +106,10 @@
 						<div class="page-nav">
 							<nav aria-label="Page navigation example">
 								<ul class="pagination">
-									<li class="page-item"><a class="page-link" th:if="${expenses.number > 0}" th:href="@{/expenses(page=${expenses.number - 1})}">Previous</a></li>
+									<li class="page-item"><a class="page-link" th:if="${expenses.number > 0}" th:href="@{/dashboard(page=${expenses.number - 1})}">Previous</a></li>
 
 									<!-- Show first page number -->
-									<li th:if="${expenses.number >= 1}" class="page-item"><a class="page-link" th:href="@{/expenses(page=0)}">1</a></li>
+									<li th:if="${expenses.number >= 1}" class="page-item"><a class="page-link" th:href="@{/dashboard(page=0)}">1</a></li>
 
 									<li th:if="${expenses.number < 1}" class="page-item disabled">
 										<a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
@@ -107,25 +119,25 @@
 									<li th:if="${expenses.number >= 3}"><span class="page-link">...</span></li>
 
 									<!-- Show two pages before the current page -->
-									<li th:if="${expenses.number >= 2}" class="page-item"><a class="page-link" th:href="@{/expenses(page=${expenses.number - 1})}" th:text="${expenses.number}"></a></li>
+									<li th:if="${expenses.number >= 2}" class="page-item"><a class="page-link" th:href="@{/dashboard(page=${expenses.number - 1})}" th:text="${expenses.number}"></a></li>
 
 									<!-- Show the current page number -->
 									<li class="page-item active"><span class="page-link" th:text="${expenses.number + 1}"></span></li>
 
 									<!-- Show two pages after the current page -->
-									<li th:if="${expenses.number < expenses.totalPages - 1}" class="page-item"><a class="page-link" th:href="@{/expenses(page=${expenses.number + 1})}" th:text="${expenses.number + 2}"></a></li>
+									<li th:if="${expenses.number < expenses.totalPages - 1}" class="page-item"><a class="page-link" th:href="@{/dashboard(page=${expenses.number + 1})}" th:text="${expenses.number + 2}"></a></li>
 
 									<!-- Show ellipsis if current page is less than (totalPages - 3) -->
 									<li th:if="${expenses.number < expenses.totalPages - 3}"><span class="page-link">...</span></li>
 
 									<!-- Show last page number -->
-									<li th:if="${expenses.number < expenses.totalPages-2}" class="page-item"><a class="page-link" th:href="@{/expenses(page=${expenses.totalPages - 1})}" th:text="${expenses.totalPages}"></a></li>
+									<li th:if="${expenses.number < expenses.totalPages-2}" class="page-item"><a class="page-link" th:href="@{/dashboard(page=${expenses.totalPages - 1})}" th:text="${expenses.totalPages}"></a></li>
 
 									<li th:if="${expenses.number > expenses.totalPages-2}" class="page-item disabled">
 										<a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
 									</li>
 
-									<li class="page-item"><a class="page-link" th:if="${expenses.number < expenses.totalPages - 1}" th:href="@{/expenses(page=${expenses.number + 1})}">Next</a></li>
+									<li class="page-item"><a class="page-link" th:if="${expenses.number < expenses.totalPages - 1}" th:href="@{/dashboard(page=${expenses.number + 1})}">Next</a></li>
 								</ul>
 							</nav>
 						</div>
@@ -180,7 +192,7 @@
 					</div>
 
 					<div class="mb-3"> <!--date-->
-						<label for="date" class="form-label">Date of birth</label>
+						<label for="date" class="form-label">Date of expense</label>
 						<input type="date" class="form-control form-rounded" id="date" th:field="*{date}" th:errorclass="is-invalid">
 						<div id="validationDate" class="invalid-feedback" th:errors="*{date}">
 						</div>

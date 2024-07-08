@@ -23,6 +23,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.security.Principal;
@@ -154,7 +155,7 @@ public class ExpenseController {
     }
 
     @PostMapping("/newExpenseType/delete/{id}")
-    public String deleteById(@PathVariable("id") Long id, Principal principal){
+    public String deleteById(@PathVariable("id") Long id, Principal principal, RedirectAttributes redirectAttributes){
         String username = principal.getName();
         User user = userRepository.getUserByUserName(username);
         Optional<ExpenseType>optionalExpenseType = expenseTypeRepository.findById(id);
@@ -162,12 +163,18 @@ public class ExpenseController {
         if(optionalExpenseType.isPresent()){
             ExpenseType expenseType = optionalExpenseType.get();
             if(expenseType.getUser().getId().equals(user.getId())){
-                expenseTypeRepository.delete(expenseType);
+                boolean hasExpenses = expenseRepository.existsByExpenseType(expenseType);
+                if(hasExpenses){
+                    redirectAttributes.addFlashAttribute("error", "Cannot delete expense type.There are existing expenses of this type.");
+                } else{
+                    expenseTypeRepository.delete(expenseType);
+                    redirectAttributes.addFlashAttribute("success", "Expense type deleted.");
+                }
             } else{
-
+                redirectAttributes.addFlashAttribute("error", "You don't have the permission to delete this expense type.");
             }
         } else{
-
+            redirectAttributes.addFlashAttribute("error", "Expense type not found.");
         }
         return "redirect:/newExpenseType";
     }
@@ -177,15 +184,12 @@ public class ExpenseController {
                              BindingResult bindingResult,
                              Principal principal,
                              Model model){
-        System.out.println(expense);
         if (bindingResult.hasErrors()) {
             model.addAttribute("expense", expense);
-            System.out.println("BINDING HAS ERRORS ____________________________________>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
             return "redirect:/dashboard";
         }
         String username = principal.getName();
         User user = userRepository.getUserByUserName(username);
-        System.out.println("********************************&&&&&&&&&&&&&&&&&&&&&&&&&&&&&*******************************");
 
         System.out.println(expense);
 
@@ -198,6 +202,29 @@ public class ExpenseController {
 
         return "redirect:/dashboard";
     }
+
+    @PostMapping("/delete/{id}")
+    public String deleteExpenseById(@PathVariable("id") Long id, Principal principal){
+
+        String username = principal.getName();
+        User user = userRepository.getUserByUserName(username);
+        System.out.println(user);
+
+        Optional<Expense> optionalExpense = expenseRepository.findById(id);
+        if(optionalExpense.isPresent()){
+            Expense expense = optionalExpense.get();
+            System.out.println(expense);
+            List<Expense>userExpense = user.getExpenses();
+            userExpense.remove(expense);
+
+            expenseRepository.delete(expense);
+        }
+
+
+
+        return "redirect:/dashboard";
+    }
+
 
 
 }

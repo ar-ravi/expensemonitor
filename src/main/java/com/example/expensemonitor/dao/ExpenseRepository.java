@@ -21,6 +21,8 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
 
+    boolean existsByExpenseType(ExpenseType expenseType);
+
     Page<Expense> findAllByUserId(Long userId, Pageable pageable);
 
     Iterable<Expense> findByUserIdAndDateBetween(Long userId, LocalDate startDate, LocalDate endDate);
