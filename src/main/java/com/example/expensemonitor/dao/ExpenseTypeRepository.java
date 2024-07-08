@@ -22,4 +22,7 @@ public interface ExpenseTypeRepository extends JpaRepository<ExpenseType, Long> 
 
     Optional<ExpenseType>findByExpenseCategoryAndUser(String expenseCategory, User user);
     List<ExpenseType> findByUserId(Long userId);
+
+
+
 }

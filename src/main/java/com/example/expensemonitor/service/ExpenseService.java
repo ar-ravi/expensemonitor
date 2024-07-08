@@ -49,26 +49,11 @@ public class ExpenseService {
         return expenseRepository.save(entity);
     }
 
-    /**
-     *
-     * @param id
-     * @returns the saved entity if found, otherwise throws EntityNotFoundException
-     */
     public Expense findById(Long id) {
         return expenseRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Sorry, the content you are looking for does not exist."));
     }
 
-
-    /**
-     * Retrieves a Page of Expense objects sorted by their creation date in descending order.
-     *
-     * The provided Pageable object determines the page number, page size, and any additional sorting or filtering options.
-     * It is to ensure that each new expense added will stack on top.
-     *
-     * @param pageable The Pageable object specifying the page number, page size, and sorting preferences.
-     * @return A Page containing a list of Expense objects sorted by their creation date in descending order.
-     */
     public Page<Expense> findAllByUserId(Long userId, Pageable pageable) {
         Pageable sortedPageable = PageRequest.of(
                 pageable.getPageNumber(),
@@ -88,12 +73,7 @@ public class ExpenseService {
         expenseRepository.delete(expenseToBeDeleted);
     }
 
-    /**
-     * Estimates the total amount of expenses from the given Iterable of Expense objects.
-     *
-     * @param expenses An Iterable of Expense objects containing expense data.
-     * @return The total amount of expenses as a BigDecimal value.
-     */
+
     public BigDecimal getTotalAmount(Iterable<Expense> expenses){
         return StreamSupport.
                 stream(expenses.spliterator(), false)
@@ -103,18 +83,7 @@ public class ExpenseService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    /**
-     * Retrieves a Page of Expense objects filtered by year, month, and expense type.
-     *
-     * This method queries the expense repository to retrieve expenses within the specified year and month,
-     * belonging to the given expense type. The results are ordered by creation date in descending order.
-     *
-     * @param year The year for filtering expenses.
-     * @param month The month for filtering expenses.
-     * @param expenseType The expense type for filtering expenses.
-     * @param page The Pageable object specifying the desired page and page size.
-     * @return A Page containing filtered Expense objects.
-     */
+
     public Page<Expense> getExpensesByYearMonthAndType(Long userId, int year, Month month, String expenseType, Pageable page) {
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
@@ -132,15 +101,6 @@ public class ExpenseService {
         return expenseRepository.findByUserIdAndExpenseType_ExpenseCategoryOrderByCreationDateDesc(userId, expenseType, page);
     }
 
-    // You might want to update this method to include userId
-    public void deleteById(Long id, Long userId) {
-        Expense expenseToBeDeleted = findById(id);
-        if (expenseToBeDeleted.getId().equals(userId)) {
-            expenseRepository.delete(expenseToBeDeleted);
-        } else {
-            throw new IllegalArgumentException("User does not have permission to delete this expense");
-        }
-    }
 
     // Update this method to include userId
     public Expense save(Expense entity, Long userId) {
@@ -183,6 +143,38 @@ public class ExpenseService {
         oldExpense.setName(newExpense.getName());
 
         expenseRepository.save(oldExpense);
+    }
+
+    @Transactional
+    public void deleteExpenseById(Long id, String username) throws Exception {
+        User user = userRepository.getUserByUserName(username);
+        Optional<Expense> optionalExpense = expenseRepository.findById(id);
+        if (optionalExpense.isPresent()) {
+            Expense expense = optionalExpense.get();
+            if (!user.getExpenses().contains(expense)) {
+                throw new Exception("Expense does not belong to user");
+            }
+            user.getExpenses().remove(expense);
+            expenseRepository.delete(expense);
+        } else {
+            throw new Exception("Expense not found");
+        }
+    }
+
+    public Page<Expense> getFilteredExpenses(Long userId, Integer year, Month month, String expenseType, Pageable page) {
+        LocalDate startDate = null;
+        LocalDate endDate = null;
+
+        if (year != null && month != null) {
+            startDate = LocalDate.of(year, month, 1);
+            endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+        }
+
+        if (expenseType != null && expenseType.trim().isEmpty()) {
+            expenseType = null;
+        }
+
+        return expenseRepository.findFilteredExpenses(userId, startDate, endDate, expenseType, page);
     }
 
 

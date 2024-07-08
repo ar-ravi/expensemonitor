@@ -106,10 +106,17 @@
 						<div class="page-nav">
 							<nav aria-label="Page navigation example">
 								<ul class="pagination">
-									<li class="page-item"><a class="page-link" th:if="${expenses.number > 0}" th:href="@{/dashboard(page=${expenses.number - 1})}">Previous</a></li>
+									<li class="page-item">
+										<a class="page-link" th:if="${expenses.number > 0}"
+										   th:href="@{/expenses/filter(page=${expenses.number - 1}, year=${currentYear}, month=${currentMonth}, expenseTypeFilter=${currentExpenseType})}">
+											Previous
+										</a>
+									</li>
 
 									<!-- Show first page number -->
-									<li th:if="${expenses.number >= 1}" class="page-item"><a class="page-link" th:href="@{/dashboard(page=0)}">1</a></li>
+									<li th:if="${expenses.number >= 1}" class="page-item">
+										<a class="page-link" th:href="@{/expenses/filter(page=0, year=${currentYear}, month=${currentMonth}, expenseTypeFilter=${currentExpenseType})}">1</a>
+									</li>
 
 									<li th:if="${expenses.number < 1}" class="page-item disabled">
 										<a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
@@ -119,25 +126,39 @@
 									<li th:if="${expenses.number >= 3}"><span class="page-link">...</span></li>
 
 									<!-- Show two pages before the current page -->
-									<li th:if="${expenses.number >= 2}" class="page-item"><a class="page-link" th:href="@{/dashboard(page=${expenses.number - 1})}" th:text="${expenses.number}"></a></li>
+									<li th:if="${expenses.number >= 2}" class="page-item">
+										<a class="page-link" th:href="@{/expenses/filter(page=${expenses.number - 1}, year=${currentYear}, month=${currentMonth}, expenseTypeFilter=${currentExpenseType})}"
+										   th:text="${expenses.number}"></a>
+									</li>
 
 									<!-- Show the current page number -->
 									<li class="page-item active"><span class="page-link" th:text="${expenses.number + 1}"></span></li>
 
 									<!-- Show two pages after the current page -->
-									<li th:if="${expenses.number < expenses.totalPages - 1}" class="page-item"><a class="page-link" th:href="@{/dashboard(page=${expenses.number + 1})}" th:text="${expenses.number + 2}"></a></li>
+									<li th:if="${expenses.number < expenses.totalPages - 1}" class="page-item">
+										<a class="page-link" th:href="@{/expenses/filter(page=${expenses.number + 1}, year=${currentYear}, month=${currentMonth}, expenseTypeFilter=${currentExpenseType})}"
+										   th:text="${expenses.number + 2}"></a>
+									</li>
 
 									<!-- Show ellipsis if current page is less than (totalPages - 3) -->
 									<li th:if="${expenses.number < expenses.totalPages - 3}"><span class="page-link">...</span></li>
 
 									<!-- Show last page number -->
-									<li th:if="${expenses.number < expenses.totalPages-2}" class="page-item"><a class="page-link" th:href="@{/dashboard(page=${expenses.totalPages - 1})}" th:text="${expenses.totalPages}"></a></li>
+									<li th:if="${expenses.number < expenses.totalPages-2}" class="page-item">
+										<a class="page-link" th:href="@{/expenses/filter(page=${expenses.totalPages - 1}, year=${currentYear}, month=${currentMonth}, expenseTypeFilter=${currentExpenseType})}"
+										   th:text="${expenses.totalPages}"></a>
+									</li>
 
 									<li th:if="${expenses.number > expenses.totalPages-2}" class="page-item disabled">
 										<a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
 									</li>
 
-									<li class="page-item"><a class="page-link" th:if="${expenses.number < expenses.totalPages - 1}" th:href="@{/dashboard(page=${expenses.number + 1})}">Next</a></li>
+									<li class="page-item">
+										<a class="page-link" th:if="${expenses.number < expenses.totalPages - 1}"
+										   th:href="@{/expenses/filter(page=${expenses.number + 1}, year=${currentYear}, month=${currentMonth}, expenseTypeFilter=${currentExpenseType})}">
+											Next
+										</a>
+									</li>
 								</ul>
 							</nav>
 						</div>

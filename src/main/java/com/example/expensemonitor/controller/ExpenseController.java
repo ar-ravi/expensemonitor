@@ -28,6 +28,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 
@@ -206,21 +207,13 @@ public class ExpenseController {
     @PostMapping("/delete/{id}")
     public String deleteExpenseById(@PathVariable("id") Long id, Principal principal){
 
-        String username = principal.getName();
-        User user = userRepository.getUserByUserName(username);
-        System.out.println(user);
-
-        Optional<Expense> optionalExpense = expenseRepository.findById(id);
-        if(optionalExpense.isPresent()){
-            Expense expense = optionalExpense.get();
-            System.out.println(expense);
-            List<Expense>userExpense = user.getExpenses();
-            userExpense.remove(expense);
-
-            expenseRepository.delete(expense);
-        }
-
-
+       try{
+           String username = principal.getName();
+           expenseService.deleteExpenseById(id, username);
+       } catch (Exception e){
+           e.printStackTrace();
+           return "/error";
+       }
 
         return "redirect:/dashboard";
     }
@@ -255,9 +248,63 @@ public class ExpenseController {
             expenseService.updateExpense(expense, username);
         } catch (Exception e){
             e.printStackTrace();
+            return "/error";
         }
         return "redirect:/dashboard";
     }
+    @GetMapping("/expenses/filter")
+    public String filterExpenses(@RequestParam(required = false) Integer year,
+                                 @RequestParam(required = false) String month,
+                                 @RequestParam(required = false) String expenseTypeFilter,
+                                 @RequestParam(defaultValue = "0") int page,
+                                 @RequestParam(defaultValue = "8") int size,
+                                 Model model,
+                                 Principal principal) {
+        String username = principal.getName();
+        User user = userRepository.getUserByUserName(username);
+
+        Month monthEnum = null;
+        if (month != null && !month.isEmpty()) {
+            monthEnum = Month.valueOf(month.toUpperCase());
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Expense> filteredExpenses = expenseService.getFilteredExpenses(user.getId(), year, monthEnum, expenseTypeFilter, pageable);
+
+        // Add filtered expenses and filter parameters
+        model.addAttribute("expenses", filteredExpenses);
+        model.addAttribute("currentYear", year);
+        model.addAttribute("currentMonth", month);
+        model.addAttribute("currentExpenseType", expenseTypeFilter);
+
+        // Add pagination information
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", filteredExpenses.getTotalPages());
+        model.addAttribute("totalItems", filteredExpenses.getTotalElements());
+
+        // Add user data
+        model.addAttribute("user", user);
+
+        // Add expense types
+        List<ExpenseType> userExpenseTypes = expenseTypeRepository.findByUserId(user.getId());
+        model.addAttribute("expenseTypes", userExpenseTypes);
+
+        // Calculate and add totals
+        LocalDate now = LocalDate.now();
+        BigDecimal monthlyTotal = expenseService.getTotalAmountForMonthAndYear(user.getId(), now.getMonthValue(), now.getYear());
+        BigDecimal yearlyTotal = expenseService.getTotalAmountForYear(user.getId(), now.getYear());
+        model.addAttribute("monthlyTotal", monthlyTotal);
+        model.addAttribute("yearlyTotal", yearlyTotal);
+
+        BigDecimal totalAmount = filteredExpenses.getContent().stream()
+                .map(Expense::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        model.addAttribute("totalAmount", totalAmount);
+
+        return "user/filtered-dashboard";
+    }
+
 
 
 
