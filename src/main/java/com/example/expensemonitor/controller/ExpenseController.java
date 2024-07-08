@@ -225,6 +225,40 @@ public class ExpenseController {
         return "redirect:/dashboard";
     }
 
+    @GetMapping("/update/{id}")
+    public String showUpdateExpenseForm(@PathVariable("id") Long expenseId, Model model, Principal principal){
+        String username = principal.getName();
+        User user = userRepository.getUserByUserName(username);
+
+        Optional<Expense> optionalExpense = expenseRepository.findById(expenseId);
+        if(optionalExpense.isPresent()){
+            Expense expense = optionalExpense.get();
+            System.out.println(expense);
+            model.addAttribute("expense", expense);
+
+            Optional<ExpenseType>optionalExpenseType = expenseTypeRepository.findById(expense.getExpenseType().getId());
+            if(optionalExpenseType.isPresent()){
+                ExpenseType expenseType = optionalExpenseType.get();
+                model.addAttribute("currentExpenseType", expenseType);
+            }
+            List<ExpenseType> userExpenseTypes = expenseTypeRepository.findByUserId(user.getId());
+            model.addAttribute("expenseTypes", userExpenseTypes);
+            return "user/updateExpense";
+        }
+        return "redirect:/dashboard";
+    }
+
+    @PostMapping("/update")
+    public String updateExpense(@ModelAttribute @Valid Expense expense, Principal principal, Model model){
+        try {
+            String username = principal.getName();
+            expenseService.updateExpense(expense, username);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return "redirect:/dashboard";
+    }
+
 
 
 }

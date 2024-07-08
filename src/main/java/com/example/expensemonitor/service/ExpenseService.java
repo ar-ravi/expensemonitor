@@ -1,8 +1,12 @@
 package com.example.expensemonitor.service;
 
 import com.example.expensemonitor.dao.ExpenseRepository;
+import com.example.expensemonitor.dao.UserRepository;
 import com.example.expensemonitor.model.Expense;
+import com.example.expensemonitor.model.User;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -12,14 +16,20 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 @Service
 public class ExpenseService {
+    @Autowired
     private final ExpenseRepository expenseRepository;
 
-    public ExpenseService(ExpenseRepository expenseRepository) {
+    @Autowired
+    private final UserRepository userRepository;
+
+    public ExpenseService(ExpenseRepository expenseRepository, UserRepository userRepository) {
         this.expenseRepository = expenseRepository;
+        this.userRepository = userRepository;
     }
 
     public Page<Expense> findAll(Pageable pageable) {
@@ -149,6 +159,30 @@ public class ExpenseService {
         LocalDate endDate = LocalDate.of(year, 12, 31);
         Iterable<Expense> expenses = expenseRepository.findByUserIdAndDateBetween(userId, startDate, endDate);
         return getTotalAmount(expenses);
+    }
+
+    @Transactional
+    public void updateExpense(Expense newExpense, String username) throws Exception {
+        Optional<Expense> oldOptionalExpense = expenseRepository.findById(newExpense.getId());
+        if (!oldOptionalExpense.isPresent()) {
+            throw new Exception("Expense not found");
+        }
+
+        Expense oldExpense = oldOptionalExpense.get();
+        User user = userRepository.getUserByUserName(username);
+
+        if (!user.getExpenses().contains(oldExpense)) {
+            throw new Exception("Expense does not belong to user");
+        }
+
+        // Update fields of the existing expense
+        oldExpense.setExpenseType(newExpense.getExpenseType());
+        oldExpense.setAmount(newExpense.getAmount());
+        oldExpense.setDate(newExpense.getDate());
+        oldExpense.setCreationDate(newExpense.getCreationDate());
+        oldExpense.setName(newExpense.getName());
+
+        expenseRepository.save(oldExpense);
     }
 
 
