@@ -7,6 +7,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -38,26 +39,36 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
-        http.
-                authorizeRequests(authz -> authz
-                        .requestMatchers("/login","/signup", "/do-register",
-                                "/home", "/css/**", "/js/**", "/img/**").permitAll()
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers(
+                                "/login",
+                                "/signup",
+                                "/do-register",
+                                "/home",
+                                "/css/**",
+                                "/js/**",
+                                "/img/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
                         .defaultSuccessUrl("/dashboard", true)
-                        .failureUrl("/login")
-                        .permitAll()
+                        .failureUrl("/login?error=true")
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login")
-                        .permitAll()
+                        .logoutSuccessUrl("/login?logout=true")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
                 )
-                .csrf(csrf -> csrf.disable()
-                );
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+                )
+                .csrf(csrf -> csrf.disable());
+
         return http.build();
     }
 }
