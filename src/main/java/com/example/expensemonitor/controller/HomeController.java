@@ -6,6 +6,7 @@ import com.example.expensemonitor.model.User;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.converter.json.GsonBuilderUtils;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -40,6 +41,7 @@ public class HomeController {
 
     @GetMapping("/login")
     public String customLogin(Model model){
+        System.out.println("THIS IS YOUR LOGIN PAGE");
         model.addAttribute("title", "Login Page");
         model.addAttribute("user", new User());
         return "login";
@@ -59,10 +61,12 @@ public class HomeController {
 
     @PostMapping("/login")
     public String verifyLogin(@ModelAttribute("user") User user, Model model){
+        System.out.println("verifyLogin---------------------------------------------------------------------");
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
             );
+            System.out.println("User is verified now.");
             SecurityContextHolder.getContext().setAuthentication(authentication);
             return "redirect:/user/dashboard";
         } catch (Exception e) {
